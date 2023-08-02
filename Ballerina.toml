@@ -1,0 +1,12 @@
+[build-options]
+  observabilityIncluded = true
+
+[package]
+  distribution = "2201.3.1"
+  export = ["worldbank_data_to_covid19_statistics"]
+  icon = "docs/icon.png"
+  keywords = ["Kind/Sample","Type/Service","Category/Service","Internal/http"]
+  name = "worldbank_data_to_covid19_statistics"
+  org = "jayanihewavitharanaintern"
+  version = "3.1.2"
+
