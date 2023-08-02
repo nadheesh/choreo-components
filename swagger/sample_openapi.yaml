@@ -1,0 +1,47 @@
+openapi: 3.0.1
+info:
+  title: /
+  version: 3.1.2
+servers:
+- url: "{server}:{port}/"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "8090"
+paths:
+  /stats/{shortCountryName}:
+    get:
+      operationId: getStatsShortcountryname
+      parameters:
+      - name: shortCountryName
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stats'
+        "500":
+          description: Internal server error
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Stats:
+      required:
+      - country
+      - totalCasesPerMillion
+      type: object
+      properties:
+        country:
+          type: string
+        totalCasesPerMillion:
+          type: number
+          format: double
