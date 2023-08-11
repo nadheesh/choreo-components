@@ -38,7 +38,7 @@ service / on new http:Listener(8080) {
     # A resource for getting the books published in a given year
     # + year - the year of the books to be retrieved
     # + return - the books published in the given year
-    resource function get getBooksByYear(int year) returns error|Book[] {
+    resource function get booksByYear(int year) returns error|Book[] {
         return library.filter(function (Book book) returns boolean {
             return book.year == year;
         }).toArray();
@@ -47,7 +47,7 @@ service / on new http:Listener(8080) {
     # A resource for getting the books written by a given author
     # + authorName - the name of the author of the books to be retrieved
     # + return - the books written by the given author
-    resource function get getBooksByAuthor(string authorName) returns error|Book[] {
+    resource function get booksByAuthor(string authorName) returns error|Book[] {
         return library.filter(function (Book book) returns boolean {
             return book.author.name == authorName;
         }).toArray();
@@ -56,27 +56,38 @@ service / on new http:Listener(8080) {
     # A resource for adding a book
     # + book - the book to be added
     # + return - string message or error
-    resource function post addBook(@http:Payload Book book) returns error|string {
-        library.add(book);
-        return "successfully added book" + book.title;
+    resource function post book(@http:Payload Book book) returns error|string {
+        if (!library.hasKey(book.title)) {
+            library.add(book);
+            return "successfully added book " + book.title;
+        }
+        else {
+            return error("book already exists");
+        }
     }
 
-    #A resource to delete a book
+    # A resource to delete a book
     # + bookTitle - the title of the book to be deleted
     # + return - string message or error
-    resource function delete deleteBook(string bookTitle) returns error|string {
-        _ = library.removeIfHasKey(bookTitle);
-        return "successfully deleted book" + bookTitle;
+    resource function delete book(string bookTitle) returns error|string {
+        if (library.hasKey(bookTitle)) {
+            _ = library.remove(bookTitle);
+            return "successfully deleted book " + bookTitle;
+
+        }
+        else {
+            return error("book not found");
+        }
     }
 
-    # A resource for updating a book
+    # A resource for updating the details of a book
     # + bookTitle - the title of the book to be updated
     # + book - the book to be updated
     # + return - string message or error
-    resource function put updateBook(string bookTitle, @http:Payload Book book) returns error|string {
+    resource function put book(string bookTitle, @http:Payload Book book) returns error|string {
         if (library.hasKey(bookTitle)) {
             _ = library.put(book);
-            return "successfully updated book" + bookTitle;
+            return "successfully updated book " + bookTitle;
 
         } else {
             return error("book not found");
