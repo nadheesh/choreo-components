@@ -19,8 +19,8 @@ table<Book> key(title) library = table [
 ];
 
 # A service representing a network-accessible API
-# bound to port `9090`.
-service / on new http:Listener(9090) {
+# bound to port `8080`.
+service / on new http:Listener(8080) {
 
     # A resource for getting details of a book
     # + bookTitle - the title of the book to be retrieved
@@ -92,7 +92,7 @@ service / on new http:Listener(9090) {
 
     # A resource for counting the number of books
     # + return - the number of books in the library
-    resource function post countBooks() returns error|int {
+    resource function get countBooks() returns error|int {
         return library.length();
     }   
 }
