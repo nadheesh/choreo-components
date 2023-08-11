@@ -29,28 +29,28 @@ service / on new http:Listener(8080) {
         return library.hasKey(bookTitle) ? library.get(bookTitle) : error("Book not found");
     }
 
-    # A resource to get details of all the books in the library
+    # A resource to get details of all the books
     # + return - all the books in the library
-    resource function get books()  returns error|table<Book> {
-        return library;
+    resource function get books()  returns error|Book[] {
+        return library.toArray();
     }
 
     # A resource for getting the books published in a given year
     # + year - the year of the books to be retrieved
     # + return - the books published in the given year
-    resource function get getBooksByYear(int year) returns error|table<Book> {
+    resource function get getBooksByYear(int year) returns error|Book[] {
         return library.filter(function (Book book) returns boolean {
             return book.year == year;
-        });
+        }).toArray();
     }
 
     # A resource for getting the books written by a given author
     # + authorName - the name of the author of the books to be retrieved
     # + return - the books written by the given author
-    resource function get getBooksByAuthor(string authorName) returns error|table<Book> {
+    resource function get getBooksByAuthor(string authorName) returns error|Book[] {
         return library.filter(function (Book book) returns boolean {
             return book.author.name == authorName;
-        });
+        }).toArray();
     }
 
     # A resource for adding a book
