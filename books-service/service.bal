@@ -28,7 +28,7 @@ table<BookRecord> key(id) library = table [
 service / on new http:Listener(8080) {
 
     # A resource for getting details of a book
-    # + bookId - the title of the book to be retrieved
+    # + bookId - the id of the book to be retrieved
     # + return - the book with the given title or error
     resource function get book(int bookId) returns error|BookRecord {
         return library.hasKey(bookId) ? library.get(bookId) : error("Book not found");
