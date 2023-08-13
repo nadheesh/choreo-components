@@ -27,49 +27,32 @@ table<BookRecord> key(id) library = table [
 # bound to port `8080`.
 service / on new http:Listener(8080) {
 
-    # A resource for getting details of a book
-    # + bookId - the id of the book to be retrieved
-    # + return - the book with the given title or error
     resource function get book(int bookId) returns error|BookRecord {
         return library.hasKey(bookId) ? library.get(bookId) : error("Book not found");
     }
 
-    # A resource to get details of all the books
-    # + return - all the books in the library
     resource function get books()  returns error|BookRecord[] {
         return library.toArray();
     }
 
-    # A resource for getting the books with a given title
-    # + bookTitle - the title of the books to be retrieved
-    # + return - the books with the given title
     resource function get booksByTitle(string bookTitle) returns error|BookRecord[] {
         return library.filter(function (BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == bookTitle.toLowerAscii();
         }).toArray();
     }
     
-    # A resource for getting the books published in a given year
-    # + year - the year of the books to be retrieved
-    # + return - the books published in the given year
     resource function get booksByYear(int year) returns error|BookRecord[] {
         return library.filter(function (BookRecord bookRecord) returns boolean {
             return bookRecord.book.year == year;
         }).toArray();
     }
 
-    # A resource for getting the books written by a given author
-    # + authorName - the name of the author of the books to be retrieved
-    # + return - the books written by the given author
     resource function get booksByAuthor(string authorName) returns error|BookRecord[] {
         return library.filter(function (BookRecord bookRecord) returns boolean {
             return bookRecord.book.author.name.toLowerAscii() == authorName.toLowerAscii();
         }).toArray();
     }
 
-    # A resource for adding a book
-    # + book - the book to be added
-    # + return - string message or error
     resource function post book(@http:Payload Book book) returns error|string {
         if library.filter(function (BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == book.title.toLowerAscii() && bookRecord.book.author.name.toLowerAscii() == book.author.name.toLowerAscii();
@@ -83,9 +66,6 @@ service / on new http:Listener(8080) {
         }
     }
 
-    # A resource to delete a book
-    # + bookId - the id of the book to be deleted
-    # + return - string message or error
     resource function delete book(int bookId) returns error|string {
         if (library.hasKey(bookId)) {
             BookRecord bookRecord = library.remove(bookId);
@@ -97,10 +77,6 @@ service / on new http:Listener(8080) {
         }
     }
 
-    # A resource for updating the details of a book
-    # + bookId - the id of the book to be updated
-    # + book - the book to be updated
-    # + return - string message or error
     resource function put book(int bookId, @http:Payload Book book) returns error|string {
         if (library.hasKey(bookId)) {
             _ = library.put({id: bookId, book});
@@ -111,17 +87,12 @@ service / on new http:Listener(8080) {
         }
     }
 
-    # A resource for checking if a book exists
-    # + bookTitle - the title of the book to be checked
-    # + return - boolean value indicating whether the book exists or not
     resource function get hasBook(string bookTitle) returns error|boolean {
         return library.filter(function (BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == bookTitle.toLowerAscii();
         }).toArray().length() > 0;
     }
 
-    # A resource for counting the number of books
-    # + return - the number of books in the library
     resource function get countBooks() returns error|int {
         return library.length();
     }   
