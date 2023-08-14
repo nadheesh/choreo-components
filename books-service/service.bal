@@ -27,37 +27,37 @@ table<BookRecord> key(id) library = table [
 # bound to port `8080`.
 service / on new http:Listener(8080) {
 
-    resource function get book(int bookId) returns error|BookRecord {
-        return library.hasKey(bookId) ? library.get(bookId) : error("Book not found");
+    resource function get book(int bookId) returns http:NotFound|BookRecord {
+        return library.hasKey(bookId) ? library.get(bookId) : {body: "Book not found"};
     }
 
-    resource function get books()  returns error|BookRecord[] {
+    resource function get books() returns error|BookRecord[] {
         return library.toArray();
     }
 
     resource function get booksByTitle(string bookTitle) returns error|BookRecord[] {
-        return library.filter(function (BookRecord bookRecord) returns boolean {
+        return library.filter(function(BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == bookTitle.toLowerAscii();
         }).toArray();
     }
-    
+
     resource function get booksByYear(int year) returns error|BookRecord[] {
-        return library.filter(function (BookRecord bookRecord) returns boolean {
+        return library.filter(function(BookRecord bookRecord) returns boolean {
             return bookRecord.book.year == year;
         }).toArray();
     }
 
     resource function get booksByAuthor(string authorName) returns error|BookRecord[] {
-        return library.filter(function (BookRecord bookRecord) returns boolean {
+        return library.filter(function(BookRecord bookRecord) returns boolean {
             return bookRecord.book.author.name.toLowerAscii() == authorName.toLowerAscii();
         }).toArray();
     }
 
-    resource function post book(@http:Payload Book book) returns error|string {
-        if library.filter(function (BookRecord bookRecord) returns boolean {
+    resource function post book(@http:Payload Book book) returns http:Conflict|string {
+        if library.filter(function(BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == book.title.toLowerAscii() && bookRecord.book.author.name.toLowerAscii() == book.author.name.toLowerAscii();
         }).toArray().length() > 0 {
-            return error("A book with same title and author already exists");
+            return {body: "A book with same title and author already exists"};
         }
         else {
             int id = library.nextKey();
@@ -66,34 +66,34 @@ service / on new http:Listener(8080) {
         }
     }
 
-    resource function delete book(int bookId) returns error|string {
+    resource function delete book(int bookId) returns http:NotFound|string {
         if (library.hasKey(bookId)) {
             BookRecord bookRecord = library.remove(bookId);
             return "Successfully deleted book: " + bookRecord.book.title;
 
         }
         else {
-            return error("Book not found");
+            return {body: "Book not found"};
         }
     }
 
-    resource function put book(int bookId, @http:Payload Book book) returns error|string {
+    resource function put book(int bookId, @http:Payload Book book) returns http:NotFound|string {
         if (library.hasKey(bookId)) {
             _ = library.put({id: bookId, book});
             return "Successfully updated book: " + book.title;
 
         } else {
-            return error("Book not found");
+            return {body: "Book not found"};
         }
     }
 
     resource function get hasBook(string bookTitle) returns error|boolean {
-        return library.filter(function (BookRecord bookRecord) returns boolean {
+        return library.filter(function(BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == bookTitle.toLowerAscii();
         }).toArray().length() > 0;
     }
 
     resource function get countBooks() returns error|int {
         return library.length();
-    }   
+    }
 }
