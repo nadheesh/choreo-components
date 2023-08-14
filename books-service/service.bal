@@ -30,8 +30,8 @@ service / on new http:Listener(8080) {
     # A resource for getting details of a book
     # + bookId - the id of the book to be retrieved
     # + return - the book with the given title or error
-    resource function get book(int bookId) returns error|BookRecord {
-        return library.hasKey(bookId) ? library.get(bookId) : error("Book not found");
+    resource function get book(int bookId) returns http:NotFound|BookRecord {
+        return library.hasKey(bookId) ? library.get(bookId) : {body: "Book not found"};
     }
 
     # A resource to get details of all the books
@@ -70,11 +70,11 @@ service / on new http:Listener(8080) {
     # A resource for adding a book
     # + book - the book to be added
     # + return - string message or error
-    resource function post book(@http:Payload Book book) returns error|string {
+    resource function post book(@http:Payload Book book) returns http:Conflict|string {
         if library.filter(function (BookRecord bookRecord) returns boolean {
             return bookRecord.book.title.toLowerAscii() == book.title.toLowerAscii() && bookRecord.book.author.name.toLowerAscii() == book.author.name.toLowerAscii();
         }).toArray().length() > 0 {
-            return error("A book with same title and author already exists");
+            return {body: "A book with same title and author already exists"};
         }
         else {
             int id = library.nextKey();
@@ -86,14 +86,14 @@ service / on new http:Listener(8080) {
     # A resource to delete a book
     # + bookId - the id of the book to be deleted
     # + return - string message or error
-    resource function delete book(int bookId) returns error|string {
+    resource function delete book(int bookId) returns http:NotFound|string {
         if (library.hasKey(bookId)) {
             BookRecord bookRecord = library.remove(bookId);
             return "Successfully deleted book: " + bookRecord.book.title;
 
         }
         else {
-            return error("Book not found");
+            return {body: "Book not found"};
         }
     }
 
@@ -101,13 +101,13 @@ service / on new http:Listener(8080) {
     # + bookId - the id of the book to be updated
     # + book - the book to be updated
     # + return - string message or error
-    resource function put book(int bookId, @http:Payload Book book) returns error|string {
+    resource function put book(int bookId, @http:Payload Book book) returns http:NotFound|string {
         if (library.hasKey(bookId)) {
             _ = library.put({id: bookId, book});
             return "Successfully updated book: " + book.title;
 
         } else {
-            return error("Book not found");
+            return {body: "Book not found"};
         }
     }
 
