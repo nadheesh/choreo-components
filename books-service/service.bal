@@ -1,4 +1,5 @@
 import ballerina/http;
+import ballerina/lang.runtime;
 
 type Author record {
     string name;
@@ -31,7 +32,11 @@ service / on new http:Listener(8080) {
         return library.hasKey(bookId) ? library.get(bookId) : {body: "Book not found"};
     }
 
-    resource function get books() returns error|BookRecord[] {
+    resource function get books(boolean? sleep) returns error|BookRecord[] {
+        if (sleep is boolean && sleep) {
+            // Sleep for 5 seconds
+            runtime:sleep(3);
+        }
         return library.toArray();
     }
 
